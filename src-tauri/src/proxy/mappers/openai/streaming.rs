@@ -125,6 +125,7 @@ where
         let mut emitted_tool_calls = std::collections::HashSet::new();
         let mut final_usage: Option<super::models::OpenAIUsage> = None;
         let mut error_occurred = false;
+        let mut has_emitted_content = false;
         let mut tool_call_index = 0;
 
         let mut heartbeat_interval = tokio::time::interval(std::time::Duration::from_secs(15));
@@ -253,12 +254,16 @@ where
                                                         if !grounding_text.is_empty() { content_out.push_str(&grounding_text); }
                                                     }
 
-                                                    let gemini_finish_reason = candidate.get("finishReason").and_then(|f| f.as_str()).map(|f| match f {
+                                                    let raw_finish_reason = candidate.get("finishReason").and_then(|f| f.as_str());
+                                                    let is_malformed_function_call = raw_finish_reason == Some("MALFORMED_FUNCTION_CALL");
+
+                                                    let gemini_finish_reason = raw_finish_reason.map(|f| match f {
                                                         "STOP" => "stop",
                                                         "MAX_TOKENS" => "length",
                                                         "SAFETY" => "content_filter",
                                                         "RECITATION" => "content_filter",
-                                                        _ => f,
+                                                        "MALFORMED_FUNCTION_CALL" => "stop",
+                                                        _ => "stop",
                                                     });
 
                                                     // [FIX #1575] 如果发射了工具调用，强制设置为 tool_calls
@@ -268,6 +273,12 @@ where
                                                     } else {
                                                         gemini_finish_reason
                                                     };
+
+                                                    // [FIX MALFORMED_FUNCTION_CALL] 若模型试图调用未配置的内部工具或格式异常导致提前中断，
+                                                    // 且未生成正文内容，自动注入友好提示，避免客户端显示空白
+                                                    if is_malformed_function_call && content_out.is_empty() && !has_emitted_content {
+                                                        content_out.push_str("很抱歉，当前模型在尝试调取实时信息时遇到了格式异常。若需要查询实时天气或最新资讯，请尝试使用联网模式（模型名带 -online 后缀）或配置天气/搜索插件。");
+                                                    }
 
                                                     if !thought_out.is_empty() {
                                                         let reasoning_chunk = json!({
@@ -286,6 +297,9 @@ where
                                                     }
 
                                                     if !content_out.is_empty() || finish_reason.is_some() {
+                                                        if !content_out.is_empty() {
+                                                            has_emitted_content = true;
+                                                        }
                                                         let mut openai_chunk = json!({
                                                             "id": &stream_id,
                                                             "object": "chat.completion.chunk",
@@ -423,7 +437,7 @@ where
                                             }
 
                                             let finish_reason = actual_data.get("candidates").and_then(|c| c.as_array()).and_then(|c| c.get(0)).and_then(|c| c.get("finishReason")).and_then(|f| f.as_str()).map(|f| match f {
-                                                "STOP" => "stop", "MAX_TOKENS" => "length", "SAFETY" => "content_filter", _ => f,
+                                                "STOP" => "stop", "MAX_TOKENS" => "length", "SAFETY" => "content_filter", "RECITATION" => "content_filter", _ => "stop",
                                             });
 
                                             let mut legacy_chunk = json!({

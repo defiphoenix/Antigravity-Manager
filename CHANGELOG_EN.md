@@ -4,6 +4,10 @@
 
 *   **Version History**:
     *   **v4.7.1 (2026-09-12)**:
+        -   **[Upstream Protocol Optimization & Native Alignment] Native Language Server Alignment: Dynamic Agent RequestType, Fine-Grained 429 Classification & Malformed Call Fallback**:
+            -   **Dynamic On-Demand `requestType: "agent"`**: Reverse-engineered native Antigravity language server behavior to eliminate unnecessary `"requestType": "agent"` flags on every prompt. Now, Agent mode is only activated when tool declarations exist or messages contain tool turns. Normal chat and code completions flow through the standard Chat pool, drastically reducing 429 rate limit contention on Google's Agent pool.
+            -   **Fine-Grained 429 Classification**: Refined `parse_rate_limit_reason` so that transient `RESOURCE_EXHAUSTED` responses lacking explicit `quotaResetTimeStamp` markers are classified as short-lived concurrency spikes (`RateLimitExceeded`) rather than hard quota exhaustion, preventing accounts from being erroneously locked out for 30 minutes.
+            -   **Normalized `finish_reason` & `MALFORMED_FUNCTION_CALL` Fallback**: Mapped Gemini's internal `MALFORMED_FUNCTION_CALL` reason to standard OpenAI `"stop"`. If the model aborts without generating content, automatically injects a helpful fallback message to eliminate blank chat bubbles and parsing errors in downstream clients (NextChat, LobeChat, Cherry Studio, etc.).
         -   **[Ecosystem Integration] One-Click Sync of APIKEY.FUN Credentials & Models to OpenCode (PR #3427)**:
             -   **OpenCode Sync Button**: Added an OpenCode sync feature on the APIKEY.FUN page to automatically export the configured API Key, BaseURL, and discovered models into OpenCode's configuration as an independent `apikey-fun` provider (via `@ai-sdk/openai-compatible`).
             -   **Safety & Edge Protections**: Supports both Tauri commands and HTTP API; backs up existing configuration files prior to mutation while preserving other providers and custom model parameters; normalizes trailing slashes to prevent `/v1/v1` duplication; full 13-locale i18n support.

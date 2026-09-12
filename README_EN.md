@@ -446,7 +446,7 @@ In clients that support OpenAI protocol (e.g., Cherry Studio), you can configure
 
 ## 📝 Changelog
 
-> Latest version **v4.7.1** (2026-09-12): Added one-click sync of APIKEY.FUN credentials and models to OpenCode, atomic file writes with physical fsync for accounts and configurations, resolved reset_time NaN countdown and isolated model-level zero-quota circuit breaking, automated request log retention and incremental vacuum, proxy password decryption failure alerts and URL fallback, Claude signature log demotion and Docker Compose log rotation, and highlighted active switches in dark mode.
+> Latest version **v4.7.1** (2026-09-12): Native language server reverse-engineering alignment with dynamic on-demand Agent requestType, fine-grained 429 classification to prevent false lockouts, MALFORMED_FUNCTION_CALL normalization and blank response self-healing, one-click sync of APIKEY.FUN credentials and models to OpenCode, atomic file writes with physical fsync for accounts and configurations, resolved reset_time NaN countdown and isolated model-level zero-quota circuit breaking, automated request log retention and incremental vacuum, proxy password decryption failure alerts and URL fallback, Claude signature log demotion and Docker Compose log rotation, and highlighted active switches in dark mode.
 
 👉 **[View Full Changelog → CHANGELOG_EN.md](CHANGELOG_EN.md)**
 

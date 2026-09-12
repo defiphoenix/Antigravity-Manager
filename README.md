@@ -457,7 +457,7 @@ response = client.chat.completions.create(
 
 ## 📝 更新日志
 
-> 最新版本 **v4.7.1**（2026-09-12）：支持一键将 APIKEY.FUN 凭据与模型同步至 OpenCode、核心账号与配置物理刷盘原子写入防损坏、修复 reset_time NaN 倒计时与单模型零配额隔离熔断、代理日志自动保留与增量空间回收、代理密码解密失败安全告警与 URL 凭据优雅降级、Claude 签名日志降噪与 Docker 日志轮转、暗黑模式开关高亮。
+> 最新版本 **v4.7.1**（2026-09-12）：原生语言服务逆向对齐与动态 Agent requestType 按需切换、细粒度 429 熔断分类防误锁、MALFORMED_FUNCTION_CALL 规范化与空白响应自愈、支持一键将 APIKEY.FUN 凭据与模型同步至 OpenCode、核心账号与配置物理刷盘原子写入防损坏、修复 reset_time NaN 倒计时与单模型零配额隔离熔断、代理日志自动保留与增量空间回收、代理密码解密失败安全告警与 URL 凭据优雅降级、Claude 签名日志降噪与 Docker 日志轮转、暗黑模式开关高亮。
 
 👉 **[查看完整更新日志 CHANGELOG.md →](CHANGELOG.md)**
 

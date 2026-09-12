@@ -15,7 +15,6 @@ dist-ssr
 dist
 
 # Editor directories and files
-.vscode/*
 !.vscode/extensions.json
 .idea
 .DS_Store
@@ -31,8 +30,6 @@ src-tauri/gen/
 src-tauri/.env
 
 # Environment
-.env
-.env.*
 environment/
 
 # Python virtual environments and test files
@@ -51,3 +48,7 @@ scripts/dump_full.py
 scripts/probe_weekly.py
 scripts/probe_quota_summary.pyDOCKER_DEPLOYMENT.md
 pnpm-lock.yaml
+branch_structure.json
+temp_auto_push.bat
+temp_interactive_push.bat
+config.bat

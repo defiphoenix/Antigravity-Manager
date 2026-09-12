@@ -348,14 +348,16 @@ pub fn transform_openai_response(
                 }
             }
 
-            let finish_reason = candidate
-                .get("finishReason")
-                .and_then(|f| f.as_str())
+            let raw_finish_reason = candidate.get("finishReason").and_then(|f| f.as_str());
+            let is_malformed_function_call = raw_finish_reason == Some("MALFORMED_FUNCTION_CALL");
+
+            let finish_reason = raw_finish_reason
                 .map(|f| match f {
                     "STOP" => "stop",
                     "MAX_TOKENS" => "length",
                     "SAFETY" => "content_filter",
                     "RECITATION" => "content_filter",
+                    "MALFORMED_FUNCTION_CALL" => "stop",
                     _ => "stop",
                 })
                 .unwrap_or("stop");
@@ -365,6 +367,11 @@ pub fn transform_openai_response(
             } else {
                 None
             };
+
+            // [FIX MALFORMED_FUNCTION_CALL] 避免客户端空白
+            if is_malformed_function_call && content_out.is_empty() {
+                content_out.push_str("很抱歉，当前模型在尝试调取实时信息时遇到了格式异常。若需要查询实时天气或最新资讯，请尝试使用联网模式（模型名带 -online 后缀）或配置天气/搜索插件。");
+            }
 
             choices.push(Choice {
                 index: idx as u32,

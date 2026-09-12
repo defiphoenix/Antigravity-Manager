@@ -4,6 +4,10 @@
 
 *   **版本演进**:
     *   **v4.7.1 (2026-09-12)**:
+        -   **[上游协议优化 & 原生对齐] 原生语言服务逆向对齐：按需切换 Agent 模式、细粒度 429 熔断分类与空响应异常自愈**:
+            -   **动态按需切换 `requestType: "agent"`**: 逆向分析原生 Antigravity 语言服务客户端行为，消除以往所有请求盲目携带 `requestType: "agent"` 挤占 Google 专用 Agent 资源池导致的频繁 429 限流。仅在请求携带 `tools` 函数定义或包含历史工具交互轮次时才激活 Agent 通道；常规文本对话、代码补全均走标准 Chat 资源池，显著降低限流概率。
+            -   **细粒度 429 熔断分类**: 优化 `parse_rate_limit_reason`，将缺乏明确配额重置时间戳（`quotaResetTimeStamp`）的突发并发拥堵及通用 `RESOURCE_EXHAUSTED` 错误归类为短时并发超限（`RateLimitExceeded`），实施秒级宽限退避，杜绝因临时拥塞将正常账号误判为硬性配额耗尽并锁定 30 分钟。
+            -   **规范化 `finish_reason` 与 `MALFORMED_FUNCTION_CALL` 优雅兜底**: 针对 Gemini 在处理实时查询（如天气）时因模型格式异常或工具缺失中断返回 `MALFORMED_FUNCTION_CALL` 的情况，将其规范化收敛至标准 `"stop"`，并在生成正文为空时自动注入友好引导说明，避免下游客户端（NextChat、LobeChat、Cherry Studio 等）聊天气泡出现空白或解析崩溃。
         -   **[生态集成] 支持一键将 APIKEY.FUN 凭据与模型列表同步至 OpenCode (PR #3427)**:
             -   **OpenCode 一键同步按钮**: 在 APIKEY.FUN 页面新增同步至 OpenCode 功能，将当前配置的 API Key、BaseURL 及已探测出的可用模型列表同步配置为 OpenCode 的 `apikey-fun` 独立 Provider（基于 `@ai-sdk/openai-compatible`）。
             -   **安全与边缘容错保障**: 支持 Tauri 原生命令与 Web API；写入前自动安全备份既有配置并保留用户既有 Providers 与自定义模型参数；BaseURL 尾部斜杠规范化防止端点重复；多语言 13 国本地化完整支持。
